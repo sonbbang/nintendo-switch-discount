@@ -61,9 +61,6 @@ public class NintendoKorea {
             }
             pageNumber++;
 
-            if (pageNumber == 3) {
-                break;
-            }
         }
 
         return gameInfos;
