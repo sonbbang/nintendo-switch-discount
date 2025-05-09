@@ -109,7 +109,7 @@ public class NintendoKorea {
         gameInfo.setResultPrice(gameInfo.getDiscountPrice());
         gameInfo.setNintendoDetailUrl(link.attr("href"));
         gameInfo.setImage(photo.attr("src"));
-        gameInfo.setTitle(title.trim());
+        gameInfo.setTitle(title.replace(" Special","").trim());
         gameInfo.setReleased(released);
 
         return gameInfo;
