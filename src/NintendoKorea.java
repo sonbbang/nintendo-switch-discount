@@ -6,11 +6,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.net.ssl.*;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -36,7 +40,7 @@ public class NintendoKorea {
         }
     }
 
-    private static List<GameInfo> crawlGameInfos() throws IOException {
+    private static List<GameInfo> crawlGameInfos() throws IOException, NoSuchAlgorithmException, KeyManagementException {
         List<GameInfo> gameInfos = new ArrayList<>();
         List<String> titles = new ArrayList<>();
         int pageNumber = 1;
@@ -45,6 +49,20 @@ public class NintendoKorea {
         while (true) {
             String url = buildPageUrl(pageNumber);
             log.info("크롤링 URL: [{}]", url);
+
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                    }
+            };
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+            HostnameVerifier allHostsValid = (hostname, session) -> true;
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
             Document doc = Jsoup.connect(url).get();
             List<GameInfo> pageGameInfos = parseProducts(doc, totalCount, titles);
